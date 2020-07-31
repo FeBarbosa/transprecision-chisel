@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.iotesters.{PeekPokeTester, Driver, ChiselFlatSpec}
 
 class DoubleToFloatTests(c: DoubleToFloat) extends PeekPokeTester(c) {
-  val filename = "/home/felipe/scala_test/chisel-template-lite/a.txt"
+  val filename = "/media/felipe/Arquivos1/hardware_descriptions/transprecision-chisel/input/a.txt"
   val bufferedSource = Source.fromFile(filename)
   val buf = ArrayBuffer.empty[String]
 
@@ -17,7 +17,7 @@ class DoubleToFloatTests(c: DoubleToFloat) extends PeekPokeTester(c) {
 
   for (i <- 0 until buf.size by 2) {
     val input: UInt = ("b" + buf(i)).asUInt(64.W)
-    val output: UInt = ("b" + buf(i+1)).asUInt(32.W)
+    val output: UInt = ("b" + buf(i+1)).asUInt(64.W)
 
     poke(c.io.input, input)
     step(1)

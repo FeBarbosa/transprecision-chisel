@@ -5,11 +5,11 @@ import chisel3.util.Cat
 
 class FloatToDouble extends Module {
   val io = IO(new Bundle {
-    val input = Input(UInt(32.W))
+    val input = Input(UInt(64.W))
     val output = Output(UInt(64.W))
   })
 
-  val floatTemp= Wire(UInt(32.W))
+  val floatTemp= Wire(UInt(64.W))
   val sig = Wire(UInt(1.W))
   val exp = Wire(UInt(11.W))
   val frac = Wire(UInt(52.W))

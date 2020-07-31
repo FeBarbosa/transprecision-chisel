@@ -6,7 +6,7 @@ import chisel3.util.Cat
 class DoubleToFloat extends Module {
   val io = IO(new Bundle {
     val input = Input(UInt(64.W))
-    val output = Output(UInt(32.W))
+    val output = Output(UInt(64.W))
   })
 
   val doubleTemp = Wire(UInt(64.W))
@@ -49,5 +49,5 @@ class DoubleToFloat extends Module {
 
   }
 
-  io.output := Cat(sig, exp, frac)
+  io.output := Cat(0.asUInt(32.W), sig, exp, frac)
 }
