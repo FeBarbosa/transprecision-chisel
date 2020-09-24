@@ -35,11 +35,19 @@ class transpNaiveDoublAsFloat extends Module{
 
   inst_transp := io.id_inst
 
-  val isFMV_XD = (inst_transp(6,0) === 83.asUInt(7.W) && inst_transp(31, 25) === 113.asUInt(7.W))
-  val isFMV_DX = (inst_transp(6,0) === 83.asUInt(7.W) && inst_transp(31, 25) === 121.asUInt(7.W))
-  val isFCVT_SD = (inst_transp(6,0) === 32.asUInt(7.W) && inst_transp(31, 25) === 83.asUInt(7.W))
-  val isFLD= (inst_transp(6,0) === 7.asUInt(7.W) && inst_transp(14, 12) === 3.asUInt(3.W))
-  val isFSD= (inst_transp(6,0) === 39.asUInt(7.W) && inst_transp(14, 12) === 3.asUInt(3.W))
+  val isFMV_XD = (inst_transp(31, 25) === 113.asUInt(7.W) && inst_transp(6,0) === 83.asUInt(7.W))
+  val isFMV_DX = (inst_transp(31, 25) === 121.asUInt(7.W) && inst_transp(6,0) === 83.asUInt(7.W))
+
+  val isFCVT_SD = (inst_transp(31, 20) === 1025.asUInt(12.W) && inst_transp(6,0) === 83.asUInt(7.W))
+  val isFCVT_DS = (inst_transp(31, 25) === 1056.asUInt(12.W) && inst_transp(6,0) === 83.asUInt(7.W))
+
+  val isFLD= (inst_transp(14, 12) === 3.asUInt(3.W) && inst_transp(6,0) === 7.asUInt(7.W))
+  val isFSD= (inst_transp(14, 12) === 3.asUInt(3.W) && inst_transp(6,0) === 39.asUInt(7.W))
+
+  val isFLW= (inst_transp(14, 12) === 2.asUInt(3.W) && inst_transp(6,0) === 7.asUInt(7.W))
+  val isFSW= (inst_transp(14, 12) === 2.asUInt(3.W) && inst_transp(6,0) === 39.asUInt(7.W))
+
+
   val fmt = inst_transp(26, 25)
 
   DtoF_dmem_resp_data.io.input := io.data_word_bypass
@@ -48,26 +56,35 @@ class transpNaiveDoublAsFloat extends Module{
   DtoF_fromint_data.io.input := io.ex_rs0 // ex_rs(0)
 
 
-  when(fmt =/= 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD)
+  when((fmt =/= 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW))
   {
-    // exclude FLW, FSW, FMV_XD and FMV_DX
-    when(inst_transp(6,0) =/= 7.asUInt(7.W) || inst_transp(6,0) =/= 39.asUInt(7.W) || !isFMV_XD || !isFMV_DX) {
+    // exclude FCVT.S.D, FCVT.D.S, FLD, FSD, FMV_XD and FMV_DX
+    when(!isFLD && !isFSD && !isFCVT_SD && !isFCVT_DS) {
       io.inst := Cat(inst_transp(31, 27), 0.asUInt(2.W), inst_transp(24, 0))
-    } .elsewhen(inst_transp(6,0) === 83.asUInt(7.W) && inst_transp(31, 25) === 32.asUInt(7.W)){
+    } .elsewhen(isFCVT_SD || isFCVT_DS){
       // FCVT.S.D and FCVT.D.S
       io.inst := Cat(16.asUInt(7.W), inst_transp(19, 15), inst_transp(19, 15), 0.asUInt(3.W), inst_transp(11, 0))
     }.otherwise{
-      // FLW and FSW
+      // FLD and FSD
       io.inst := io.id_inst
     }
 
-    io.dmem_resp_data := Mux(inst_transp(5) === 1.asUInt(1.W), DtoF_dmem_resp_data.io.output, io.data_word_bypass)
+    // io.dmem_resp_data := Mux(inst_transp(5) === 1.asUInt(1.W), DtoF_dmem_resp_data.io.output, io.data_word_bypass)
 
     // Convert FPU internal type interpretation
-    io.dmem_resp_type := 2.asUInt(3.W)
+    when(isFLD) {
+      io.dmem_resp_data := DtoF_dmem_resp_data.io.output
+      io.dmem_resp_type := 2.asUInt(3.W)
+    }.otherwise{
+      io.dmem_resp_data := io.data_word_bypass
+      io.dmem_resp_type := io.dmem_resp_bits_typ
+    }
 
-
-    io.resFPU := Mux(inst_transp(5), FtoD_store_data.io.output, io.store_data)
+    when(isFSD) {
+      io.resFPU := FtoD_store_data.io.output
+    }.otherwise{
+      io.resFPU := io.store_data
+    }
 
     // FMV.XD
     when(isFMV_XD){

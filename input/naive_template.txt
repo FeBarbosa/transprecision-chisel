@@ -1,0 +1,6 @@
+instruction (32-bit)
+loaded operand from D-cache (64-bit)
+loaded operand type (3-bit)
+stored operand to D-cache (64-bit)
+stored operand to intReg (64-bit)
+loaded operando from intReg (64-bit)
