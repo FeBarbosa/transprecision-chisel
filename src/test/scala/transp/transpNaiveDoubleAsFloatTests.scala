@@ -19,7 +19,7 @@ object ManageFiles{
 
 class transpNaiveDoubleAsFloatTests(c: transpNaiveDoublAsFloat) extends PeekPokeTester(c) {
 
-  val files = ManageFiles.getListOfFiles("/media/felipe/Arquivos1/hardware_descriptions/transprecision-chisel/input/naive64as32/float")
+  val files = ManageFiles.getListOfFiles("/media/felipe/Arquivos1/hardware_descriptions/transprecision-chisel/input/naive64as32/double")
 
   for(instFile <- files){
     val bufferedSource = Source.fromFile(instFile)

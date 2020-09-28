@@ -35,11 +35,11 @@ class transpNaiveDoublAsFloat extends Module{
 
   inst_transp := io.id_inst
 
-  val isFMV_XD = (inst_transp(31, 25) === 113.asUInt(7.W) && inst_transp(6,0) === 83.asUInt(7.W))
+  val isFMV_XD = (inst_transp(31, 25) === 113.asUInt(7.W) && inst_transp(14, 12) === 0.asUInt(3.W) && inst_transp(6,0) === 83.asUInt(7.W))
   val isFMV_DX = (inst_transp(31, 25) === 121.asUInt(7.W) && inst_transp(6,0) === 83.asUInt(7.W))
 
   val isFCVT_SD = (inst_transp(31, 20) === 1025.asUInt(12.W) && inst_transp(6,0) === 83.asUInt(7.W))
-  val isFCVT_DS = (inst_transp(31, 25) === 1056.asUInt(12.W) && inst_transp(6,0) === 83.asUInt(7.W))
+  val isFCVT_DS = (inst_transp(31, 20) === 1056.asUInt(12.W) && inst_transp(6,0) === 83.asUInt(7.W))
 
   val isFLD= (inst_transp(14, 12) === 3.asUInt(3.W) && inst_transp(6,0) === 7.asUInt(7.W))
   val isFSD= (inst_transp(14, 12) === 3.asUInt(3.W) && inst_transp(6,0) === 39.asUInt(7.W))
@@ -59,10 +59,11 @@ class transpNaiveDoublAsFloat extends Module{
   when((fmt =/= 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW))
   {
     // exclude FCVT.S.D, FCVT.D.S, FLD, FSD, FMV_XD and FMV_DX
-    when(!isFLD && !isFSD && !isFCVT_SD && !isFCVT_DS) {
+    when(!isFLD && !isFSD && !isFCVT_SD && !isFCVT_DS && !isFMV_XD && !isFMV_DX) {
       io.inst := Cat(inst_transp(31, 27), 0.asUInt(2.W), inst_transp(24, 0))
     } .elsewhen(isFCVT_SD || isFCVT_DS){
       // FCVT.S.D and FCVT.D.S
+      println("\n\nAqui\n")
       io.inst := Cat(16.asUInt(7.W), inst_transp(19, 15), inst_transp(19, 15), 0.asUInt(3.W), inst_transp(11, 0))
     }.otherwise{
       // FLD and FSD
