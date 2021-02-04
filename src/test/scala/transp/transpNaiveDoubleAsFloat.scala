@@ -5,6 +5,7 @@ package transp
 
 import chisel3._
 import chisel3.util.Cat
+import Chisel.ImplicitConversions._
 
 class transpNaiveDoublAsFloat extends Module{
   val io = IO(new Bundle {
@@ -55,9 +56,19 @@ class transpNaiveDoublAsFloat extends Module{
   FtoD_toint_data.io.input := io.toint_data
   DtoF_fromint_data.io.input := io.ex_rs0 // ex_rs(0)
 
+  // && isFMV_XD
 
-  when((fmt =/= 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW))
+  // when((fmt === 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW) && !isFCVT_DS)
+  when((fmt === 1.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW) && !isFCVT_DS)
   {
+    // printf("C%d: %d [%d] pc=[%x] W[r%d=%x][%d] R[r%d=%x] R[r%d=%x] inst=[%x] DASM(%x)\n",
+    // 0, 0, 0,
+    // 0,
+    // 0, 0, 0,
+    // 0, 0,
+    // 0, 0,
+    // inst_transp, inst_transp)
+
     // exclude FCVT.S.D, FCVT.D.S, FLD, FSD, FMV_XD and FMV_DX
     when(!isFLD && !isFSD && !isFCVT_SD && !isFCVT_DS && !isFMV_XD && !isFMV_DX) {
       io.inst := Cat(inst_transp(31, 27), 0.asUInt(2.W), inst_transp(24, 0))
@@ -72,14 +83,19 @@ class transpNaiveDoublAsFloat extends Module{
     // io.dmem_resp_data := Mux(inst_transp(5) === 1.asUInt(1.W), DtoF_dmem_resp_data.io.output, io.data_word_bypass)
 
     // Convert FPU internal type interpretation
-    when(isFLD) {
+    // io.dmem_resp_data := DtoF_dmem_resp_data.io.output
+    // io.dmem_resp_type := 2.asUInt(3.W)
+    io.dmem_resp_type := 2.asUInt(3.W)
+    
+    when(isFLD || isFMV_DX || isFMV_DX) {
       io.dmem_resp_data := DtoF_dmem_resp_data.io.output
-      io.dmem_resp_type := 2.asUInt(3.W)
+      // io.dmem_resp_type := 2.asUInt(3.W)
     }.otherwise{
       io.dmem_resp_data := io.data_word_bypass
-      io.dmem_resp_type := io.dmem_resp_bits_typ
+      // io.dmem_resp_type := io.dmem_resp_bits_typ
     }
 
+    // io.resFPU := FtoD_store_data.io.output
     when(isFSD) {
       io.resFPU := FtoD_store_data.io.output
     }.otherwise{

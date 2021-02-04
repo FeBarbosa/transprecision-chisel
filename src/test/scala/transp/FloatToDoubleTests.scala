@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.iotesters.{PeekPokeTester, Driver, ChiselFlatSpec}
 
 class FloatToDoubleTests(c: FloatToDouble) extends PeekPokeTester(c) {
-  val filename = "/media/felipe/Arquivos1/hardware_descriptions/transprecision-chisel/input/b.txt"
+  val filename = "/media/felipe/Arquivos/hardware_descriptions/transprecision-chisel/input/b.txt"
   val bufferedSource = Source.fromFile(filename)
   val buf = ArrayBuffer.empty[String]
 
