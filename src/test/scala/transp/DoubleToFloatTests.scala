@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.iotesters.{PeekPokeTester, Driver, ChiselFlatSpec}
 
 class DoubleToFloatTests(c: DoubleToFloat) extends PeekPokeTester(c) {
-  val filename = "/media/felipe/Arquivos1/hardware_descriptions/transprecision-chisel/input/a.txt"
+  val filename = (sys.env("PWD") + "/input/a.txt")
   val bufferedSource = Source.fromFile(filename)
   val buf = ArrayBuffer.empty[String]
 

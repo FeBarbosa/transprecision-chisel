@@ -56,7 +56,7 @@ class transpNaiveDoublAsFloat extends Module{
   DtoF_fromint_data.io.input := io.ex_rs0 // ex_rs(0)
 
 
-  when((fmt =/= 0.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW))
+  when((fmt === 1.asUInt(2.W) || isFCVT_SD || isFLD || isFSD) && (!isFLW && !isFSW))
   {
     // exclude FCVT.S.D, FCVT.D.S, FLD, FSD, FMV_XD and FMV_DX
     when(!isFLD && !isFSD && !isFCVT_SD && !isFCVT_DS && !isFMV_XD && !isFMV_DX) {
@@ -68,8 +68,6 @@ class transpNaiveDoublAsFloat extends Module{
       // FLD and FSD
       io.inst := io.id_inst
     }
-
-    // io.dmem_resp_data := Mux(inst_transp(5) === 1.asUInt(1.W), DtoF_dmem_resp_data.io.output, io.data_word_bypass)
 
     // Convert FPU internal type interpretation
     when(isFLD) {
